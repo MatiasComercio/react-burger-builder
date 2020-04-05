@@ -12,6 +12,11 @@ const INGREDIENT_PRICES = {
   bacon: 0.7
 };
 
+const fixedDecimals = (num, len) => {
+  const lenVar = Math.pow(10, len);
+  return Math.round((num + Number.EPSILON) * lenVar) / lenVar;
+};
+
 class BurgerBuilder extends Component {
   state = {
     ingredients: {
@@ -23,30 +28,29 @@ class BurgerBuilder extends Component {
     totalPrice: 4
   };
 
-  addIngredientHandler = type => {
+  updateIngredientCount = (type, delta) => {
     const oldCount = this.state.ingredients[type];
-    const newCount = oldCount + 1;
+    let newCount = oldCount + delta;
+    newCount = newCount >= 0 ? newCount : 0;
     const newIngredients = {
       ...this.state.ingredients
     };
     newIngredients[type] = newCount;
 
     const oldPrice = this.state.totalPrice;
-    const newPrice = oldPrice + INGREDIENT_PRICES[type];
+    const updatedIngredientPrice = (newCount - oldCount) * INGREDIENT_PRICES[type];
+    const newPrice = fixedDecimals(oldPrice + updatedIngredientPrice, 2);
 
     this.setState({totalPrice: newPrice, ingredients: newIngredients})
-  };
-
-  removeIngredientHandler = type => {
-
   };
 
   render() {
     return (
       <Aux>
         <Burger ingredients={this.state.ingredients}/>
+        <p>Total: $ {this.state.totalPrice}</p>
         <BuildControls
-          ingredientAdded={this.addIngredientHandler}
+          ingredientCountUpdated={this.updateIngredientCount}
         />
       </Aux>
     );

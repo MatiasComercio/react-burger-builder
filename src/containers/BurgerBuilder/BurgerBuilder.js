@@ -25,8 +25,14 @@ class BurgerBuilder extends Component {
       cheese: 0,
       meat: 0
     },
-    totalPrice: 4
+    totalPrice: 4,
+    purchaseable: false
   };
+
+  updatePurchaseState (ingredients) {
+    const sum = Object.keys(ingredients).reduce((sum, i) => sum + ingredients[i], 0);
+    this.setState({purchaseable: sum > 0});
+  }
 
   updateIngredientCount = (type, delta) => {
     const oldCount = this.state.ingredients[type];
@@ -41,7 +47,10 @@ class BurgerBuilder extends Component {
     const updatedIngredientPrice = (newCount - oldCount) * INGREDIENT_PRICES[type];
     const newPrice = fixedDecimals(oldPrice + updatedIngredientPrice, 2);
 
-    this.setState({totalPrice: newPrice, ingredients: newIngredients})
+    this.setState({totalPrice: newPrice, ingredients: newIngredients});
+    // If the `updatePurchaseState` method were to rely on `this.state.ingredients`
+    //  it may see a non-updated version of those ingredients.
+    this.updatePurchaseState(newIngredients);
   };
 
   render() {
@@ -58,6 +67,7 @@ class BurgerBuilder extends Component {
           ingredientCountUpdated={this.updateIngredientCount}
           disabled={disabledInfo}
           price={this.state.totalPrice}
+          purchaseable={this.state.purchaseable}
         />
       </Aux>
     );

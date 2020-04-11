@@ -2,7 +2,9 @@ import React, { Component } from 'react';
 
 import Aux from '../../hoc/Aux';
 import Burger from '../../components/Burger/Burger';
-import BuildControls from '../../components/Burger/BuildControls/BuildControls'
+import BuildControls from '../../components/Burger/BuildControls/BuildControls';
+import Modal from '../../components/UI/Modal/Modal';
+import OrderSummary from '../../components/Burger/OrderSummary/OrderSummary';
 
 // TODO: merge with ingredients
 const INGREDIENT_PRICES = {
@@ -26,7 +28,8 @@ class BurgerBuilder extends Component {
       meat: 0
     },
     totalPrice: 4,
-    purchaseable: false
+    purchaseable: false,
+    purchasing: false
   };
 
   updatePurchaseState (ingredients) {
@@ -53,6 +56,16 @@ class BurgerBuilder extends Component {
     this.updatePurchaseState(newIngredients);
   };
 
+  /*
+    Why it should be an arrow function.
+      https://learning.oreilly.com/videos/react-the/9781789132229/9781789132229-video8_20 min 6:00
+    This is a handler, triggered by a button. If not an arrow function (but a class method)
+      the 'this' will refer to the caller context, which is the button, not the class, and it has no state.
+  */
+  purchaseHandler = () => {
+    this.setState({purchasing: true});
+  };
+
   render() {
     const ingredients = this.state.ingredients;
     const disabledInfo = Object.keys(ingredients).reduce((mem, i) => {
@@ -62,12 +75,16 @@ class BurgerBuilder extends Component {
 
     return (
       <Aux>
+        <Modal show={this.state.purchasing}>
+          <OrderSummary ingredients={this.state.ingredients} />
+        </Modal>
         <Burger ingredients={this.state.ingredients}/>
         <BuildControls
           ingredientCountUpdated={this.updateIngredientCount}
           disabled={disabledInfo}
           price={this.state.totalPrice}
           purchaseable={this.state.purchaseable}
+          ordered={this.purchaseHandler}
         />
       </Aux>
     );
